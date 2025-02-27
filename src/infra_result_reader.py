@@ -125,13 +125,11 @@ def make_dir(path):
         print(f"'{path}' 폴더가 생성되었습니다.")
 
 def main():
-    current_path = os.getcwd()
+    # 현재 경로를 src 폴더의 상위 경로로 설정
+    current_path = os.path.dirname(os.path.dirname(os.getcwd()))
     target_dir = os.path.join(current_path, "target")
     if not os.path.exists(target_dir):
         raise RuntimeError("target 폴더에 진단결과 txt 파일을 넣어주세요.")
-    
-    # result_dir = os.path.join(current_path, "result")
-    # make_dir(result_dir)
     
     # 결과 파일 경로 설정
     output_file = os.path.join(current_path, "result.xlsx")
