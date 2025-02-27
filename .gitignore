@@ -1,5 +1,6 @@
-# target 디렉토리의 모든 파일 무시
+# 중요파일
 target/*
+result.xlsx
 
 # Python 관련 파일들
 __pycache__/
