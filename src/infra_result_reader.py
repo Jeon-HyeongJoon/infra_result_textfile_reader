@@ -126,7 +126,8 @@ def make_dir(path):
 
 def main():
     # 현재 경로를 src 폴더의 상위 경로로 설정
-    current_path = os.path.dirname(os.path.dirname(os.getcwd()))
+    current_path = os.path.dirname(os.getcwd())
+    print("project paht: ", current_path)
     target_dir = os.path.join(current_path, "target")
     if not os.path.exists(target_dir):
         raise RuntimeError("target 폴더에 진단결과 txt 파일을 넣어주세요.")
