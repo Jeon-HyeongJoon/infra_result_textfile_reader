@@ -9,6 +9,7 @@
 pip install -r requirements.txt
 
 # run
+cd src
 python .\infra_result_reader.py  
 ```
 
