@@ -1,5 +1,4 @@
 import os
-from icecream import ic
 
 class InfraResult:
     def __init__(self):
