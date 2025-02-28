@@ -50,10 +50,11 @@ class InfraResult:
         return line.startswith('###') and line.endswith('###')
 
     @classmethod
-    def parse_file(cls, filename):
+    def parse_file(cls, filename, target_encoding):
         """파일을 읽어서 InfraResult 객체들의 리스트를 반환"""
         try:
-            with open(filename, 'r', encoding='utf-8') as file:
+            print("[*] file open: ", filename, ", encoding:", target_encoding)
+            with open(filename, 'r', encoding=target_encoding) as file:
                 lines = [line.strip() for line in file.readlines()]
                 return cls.parse_vulnerabilities(lines)
         except FileNotFoundError:

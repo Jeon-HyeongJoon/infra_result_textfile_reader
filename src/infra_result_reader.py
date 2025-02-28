@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import chardet
 from infra_result import InfraResult
 
 def convert_to_dataframe(results):
@@ -7,7 +8,7 @@ def convert_to_dataframe(results):
     data = []
     for i, result in enumerate(results):
         # 디버깅을 위한 출력
-        print(f"Processing result {i+1}: {result.code}")
+        print(f"[*] Processing result {i+1}: {result.code}")
         
         # 리스트인 경우 문자열로 변환
         system_state = result.system_state.system_state if result.system_state else None
@@ -27,7 +28,7 @@ def convert_to_dataframe(results):
         }
         data.append(row)
         
-    print(f"\nTotal rows to be converted: {len(data)}")
+    print(f"\n[*] Total rows to be converted: {len(data)}")
     
     df = pd.DataFrame(data)
     return df
@@ -54,7 +55,7 @@ def save_to_excel(results, output_path):
         'font_size': 9  # 헤더 글자 크기
     })
     
-    # 기본 정렬 포맷맷
+    # 기본 정렬 포맷
     cell_format = workbook.add_format({
         'text_wrap': True,
         'valign': 'vcenter',
@@ -124,13 +125,32 @@ def make_dir(path):
         os.makedirs(path)
         print(f"'{path}' 폴더가 생성되었습니다.")
 
+def detect_encoding(file_path):
+    with open(file_path, 'rb') as f:
+        raw_data = f.read()
+    result = chardet.detect(raw_data)
+    return result['encoding']
+
+def find_common_str(filenames) :
+    common_str = ''
+    flag = False
+    for chars in zip(*filenames):
+        a = chars[0]
+        for i in range(1, len(filenames)) :
+            if a != chars[i] :
+                flag = True
+                break
+        if(flag):
+            return common_str
+        common_str += a
+
 def main():
     # 현재 경로를 src 폴더의 상위 경로로 설정
     current_path = os.path.dirname(os.getcwd())
     print("project paht: ", current_path)
     target_dir = os.path.join(current_path, "target")
     if not os.path.exists(target_dir):
-        raise RuntimeError("target 폴더에 진단결과 txt 파일을 넣어주세요.")
+        raise RuntimeError("[!] target 폴더에 진단결과 txt 파일을 넣어주세요.")
     
     # 결과 파일 경로 설정
     output_file = os.path.join(current_path, "result.xlsx")
@@ -152,16 +172,22 @@ def main():
     # ExcelWriter 객체 생성
     writer = pd.ExcelWriter(output_file, engine='xlsxwriter')
     workbook = writer.book
-    
+
+    common_str = find_common_str(result_files)
+
     print("\n=== 파일 처리 시작 ===")
     for input_file_name in result_files:
         input_file = os.path.join(target_dir, input_file_name)
-        sheet_name = os.path.splitext(input_file_name)[0].split('(')[0]
+
+        # sheet name
+        sheet_name = os.path.splitext(input_file_name)[0].split(common_str)[-1]
+        if '(' in input_file_name :
+            sheet_name = os.path.splitext(input_file_name)[0].split('(')[0]
         
         print(f"\n처리 중: {input_file_name}")
         try:
             # 결과 파일 파싱
-            results = InfraResult.parse_file(input_file)
+            results = InfraResult.parse_file(input_file, target_encoding=detect_encoding(input_file))
             
             if results:
                 # DataFrame 생성
