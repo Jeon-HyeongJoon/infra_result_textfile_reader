@@ -180,7 +180,10 @@ def main():
         input_file = os.path.join(target_dir, input_file_name)
 
         # sheet name
-        sheet_name = os.path.splitext(input_file_name)[0].split(common_str)[-1]
+        if common_str:
+            sheet_name = os.path.splitext(input_file_name)[0].split(common_str)[-1]
+        else:
+            sheet_name = os.path.splitext(input_file_name)[0]
         if '(' in input_file_name :
             sheet_name = os.path.splitext(input_file_name)[0].split('(')[0]
         
