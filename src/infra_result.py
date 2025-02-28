@@ -1,4 +1,5 @@
 import os
+from icecream import ic
 
 class InfraResult:
     def __init__(self):
@@ -53,9 +54,9 @@ class InfraResult:
     def parse_file(cls, filename, target_encoding):
         """파일을 읽어서 InfraResult 객체들의 리스트를 반환"""
         try:
-            print("[*] file open: ", filename, ", encoding:", target_encoding)
             with open(filename, 'r', encoding=target_encoding) as file:
                 lines = [line.strip() for line in file.readlines()]
+                print("[*] file open: ", filename, ", encoding:", target_encoding)
                 return cls.parse_vulnerabilities(lines)
         except FileNotFoundError:
             print(f"파일을 찾을 수 없습니다: {filename}")
@@ -72,7 +73,7 @@ class InfraResult:
         
         for i, line in enumerate(lines):
             # 파일 시작 부분의 불필요한 내용 건너뛰기
-            if not current_lines and not line.startswith('[W-'):
+            if not current_lines and not line.startswith(('[W-', '[U-')) :
                 continue
                 
             # 마지막 취약점 이후의 전체 진단 결과 섹션 체크
@@ -86,12 +87,12 @@ class InfraResult:
                 continue
                 
             # 새로운 취약점 시작 또는 파일의 마지막 줄
-            if (line.startswith('[W-') and current_lines) or i == len(lines) - 1:
-                if i == len(lines) - 1 and not line.startswith('[W-'): 
+            if (line.startswith(('[W-', '[U-')) and current_lines) or i == len(lines) - 1:
+                if i == len(lines) - 1 and not line.startswith(('[W-', '[U-')): 
                     current_lines.append(line)
                 results.append(cls.from_txt(current_lines))
                 current_lines = []
-                if line.startswith('[W-'):
+                if line.startswith(('[W-', '[U-')):
                     current_lines.append(line)
                 continue
                 
@@ -122,7 +123,7 @@ class InfraResult:
             if cls.is_separator_line(line):  # '#' 구분선 건너뛰기
                 continue
                 
-            if line.startswith('[W-'):
+            if line.startswith(('[W-', '[U-')):
                 infra_result.code = line.split(']')[0].strip('[')
                 infra_result.vulnerability_name = line.split(']')[1].strip() if ']' in line else None
                 continue
@@ -144,7 +145,7 @@ class InfraResult:
                     system_state_lines.append(line)
                     
             elif current_section == 'result':
-                if i < len(content) - 1 and not content[i + 1].startswith('[W-'):
+                if i < len(content) - 1 and not content[i + 1].startswith(('[W-', '[U-')):
                     if not line.startswith('[참고]'):
                         infra_result.result.result.append(line)
         

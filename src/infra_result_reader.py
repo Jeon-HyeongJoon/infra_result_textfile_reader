@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import chardet
+from icecream import ic
 from infra_result import InfraResult
 
 def convert_to_dataframe(results):
@@ -188,6 +189,9 @@ def main():
         try:
             # 결과 파일 파싱
             results = InfraResult.parse_file(input_file, target_encoding=detect_encoding(input_file))
+            
+            ic(results)
+
             
             if results:
                 # DataFrame 생성
